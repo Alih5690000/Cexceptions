@@ -24,7 +24,7 @@ struct CrashHandler{
     void(*response)(struct Crash*);
     jmp_buf __buf;
 };
-_Thread_local struct CrashHandler __handlers[__MAX_HANDLERS];
+_Thread_local struct CrashHandler* __handlers[__MAX_HANDLERS];
 /**
  * @brief Function for throwing errors
  * @param err A arror
@@ -33,9 +33,10 @@ _Thread_local struct CrashHandler __handlers[__MAX_HANDLERS];
  */
 void _Throw(struct Crash* err){
     if (__current_handlers>0){
-        struct CrashHandler h=__handlers[__current_handlers-1];
-        h.response(err);
-	    longjmp(h.__buf,1);
+        struct CrashHandler* h=__handlers[__current_handlers-1];
+        h->response(err);
+	    longjmp(h->__buf,1);
+		__current_handlers--;
     }
     else if (__current_handlers<=0){
         for (int i=0;i<100;i++){
@@ -52,7 +53,7 @@ void _Throw(struct Crash* err){
  */
 int _AddHandler(struct CrashHandler* handler){
     if (__current_handlers<__MAX_HANDLERS){
-        __handlers[__current_handlers]=*handler;
+        __handlers[__current_handlers]=handler;
         __current_handlers++;
         return 0;
     }
