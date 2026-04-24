@@ -15,9 +15,9 @@ double Div(double a, double b){
 
 int main(){
     struct CrashHandler h={handler};
-    TRY(h,
-        double a=Div(1.0,0.5);
-        printf("res is %.2f\n",a);
-    )
+    TRY(handler){
+        double res=Div(5.0,0.0);
+        printf("Result:%f",res);
+    }
     return 0;
 }

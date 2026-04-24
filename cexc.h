@@ -33,10 +33,8 @@ _Thread_local struct CrashHandler* __handlers[__MAX_HANDLERS];
  */
 void _Throw(struct Crash* err){
     if (__current_handlers>0){
-        struct CrashHandler* h=__handlers[__current_handlers-1];
-        h->response(err);
-	    longjmp(h->__buf,1);
-		__current_handlers--;
+        __handlers[__current_handlers-1]->response(err);
+	    longjmp(__handlers[__current_handlers-1]->__buf,1);
     }
     else if (__current_handlers<=0){
         for (int i=0;i<100;i++){
@@ -74,15 +72,16 @@ int _DecHandler(){
         return -1;
     }
 }
-//macros for danger zones
-#define TRY(handler,...) do{ \
-    int val=setjmp(handler.__buf); \
-    if (val==0){ \
-        _AddHandler(&handler); \
-        __VA_ARGS__ \
-        _DecHandler(); \
-    } \
-} while(0);
+/*
+usage
+TRY{
+    _Throw(&err);
+}
+CATCH(err){
+    //smth
+}
+*/
+#define TRY(res) struct CrashHandler __h={res}; if(_AddHandler(&__h)==0) if(setjmp(__h.__buf)==0) for (int __i=0;__i<1;_DecHandler(),__i++)
 
 void handle(struct Crash* err){
     printf("Err:%s",err->mes);
