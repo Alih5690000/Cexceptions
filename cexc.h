@@ -27,9 +27,7 @@ struct CrashHandler{
 _Thread_local struct CrashHandler* __handlers[__MAX_HANDLERS];
 /**
  * @brief Function for throwing errors
- * @param err A arror
- * @note is recommended to return function after throw because _Throw
- * wont stop programm if there's handlers
+ * @param err A a error
  */
 void _Throw(struct Crash* err){
     if (__current_handlers>0){
@@ -81,7 +79,8 @@ CATCH(err){
     //smth
 }
 */
-#define TRY(res) struct CrashHandler __h={res}; if(_AddHandler(&__h)==0) if(setjmp(__h.__buf)==0) for (int __i=0;__i<1;_DecHandler(),__i++)
+struct CrashHandler __h;
+#define TRY(res) __h=(struct CrashHandler){res}; if(_AddHandler(&__h)==0) if(setjmp(__h.__buf)==0) for (int __i=0;__i<1;_DecHandler(),__i++)
 
 void handle(struct Crash* err){
     printf("Err:%s",err->mes);

@@ -14,10 +14,13 @@ double Div(double a, double b){
 }
 
 int main(){
-    struct CrashHandler h={handler};
+    TRY(handler){
+        double res=Div(5.0,2.0);
+        printf("Result:%f\n",res);
+    }
     TRY(handler){
         double res=Div(5.0,0.0);
-        printf("Result:%f",res);
+        printf("Result:%f\n",res);
     }
     return 0;
 }
