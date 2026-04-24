@@ -21,7 +21,6 @@ Fields:
     response-a function called when error is caught
 */
 struct CrashHandler{
-    void(*response)(struct Crash*);
     jmp_buf __buf;
 };
 _Thread_local struct CrashHandler* __handlers[__MAX_HANDLERS];
@@ -31,7 +30,6 @@ _Thread_local struct CrashHandler* __handlers[__MAX_HANDLERS];
  */
 void _Throw(struct Crash* err){
     if (__current_handlers>0){
-        __handlers[__current_handlers-1]->response(err);
 	    longjmp(__handlers[__current_handlers-1]->__buf,1);
     }
     else if (__current_handlers<=0){
@@ -80,7 +78,8 @@ CATCH(err){
 }
 */
 struct CrashHandler __h;
-#define TRY(res) __h=(struct CrashHandler){res}; if(_AddHandler(&__h)==0) if(setjmp(__h.__buf)==0) for (int __i=0;__i<1;_DecHandler(),__i++)
+#define TRY if(_AddHandler(&__h)==0) if(setjmp(__h.__buf)==0) for (int __i=0;__i<1;_DecHandler(),__i++)
+#define CATCH else
 
 void handle(struct Crash* err){
     printf("Err:%s",err->mes);
