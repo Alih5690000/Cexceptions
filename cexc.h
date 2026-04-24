@@ -77,9 +77,11 @@ CATCH(err){
     //smth
 }
 */
-struct CrashHandler __h;
-#define TRY if(_AddHandler(&__h)==0) if(setjmp(__h.__buf)==0) for (int __i=0;__i<1;_DecHandler(),__i++)
+#define TRY do {struct CrashHandler__h;\
+if(setjmp(__h.__buf)==0) if(_AddHandler(&__h)==0) \
+for (int __i=0;__i<1;_DecHandler(),__i++)
 #define CATCH else
+#define END_TRY } while(0);
 
 void handle(struct Crash* err){
     printf("Err:%s",err->mes);
