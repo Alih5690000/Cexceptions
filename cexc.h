@@ -22,15 +22,17 @@ Fields:
 */
 struct CrashHandler{
     jmp_buf __buf;
+    struct Crash trapped;
 };
 _Thread_local struct CrashHandler* __handlers[__MAX_HANDLERS];
 /**
  * @brief Function for throwing errors
- * @param err A a error
+ * @param err a error
  */
 void _Throw(struct Crash* err){
     if (__current_handlers>0){
-	    longjmp(__handlers[__current_handlers-1]->__buf,1);
+        __handlers[--__current_handlers]->trapped=*err;
+	    longjmp(__handlers[__current_handlers]->__buf,1);
     }
     else if (__current_handlers<=0){
         for (int i=0;i<100;i++){
@@ -76,12 +78,13 @@ TRY{
 CATCH(err){
     //smth
 }
+END_TRY
 */
-#define TRY do {struct CrashHandler__h;\
-if(setjmp(__h.__buf)==0) if(_AddHandler(&__h)==0) \
+#define TRY do {struct CrashHandler __h;\
+if(_AddHandler(&__h)==0) if(setjmp(__h.__buf)==0) \
 for (int __i=0;__i<1;_DecHandler(),__i++)
-#define CATCH else
-#define END_TRY } while(0);
+#define CATCH(err) else{ struct Crash err=__h.trapped;
+#define END_TRY }} while(0);
 
 void handle(struct Crash* err){
     printf("Err:%s",err->mes);
